@@ -7,11 +7,11 @@
 When you first connect during a game it give send the rundown of points scored by kills/assists, etc by teams and players.
 Notable return fields for each match:
 * teamStats
-  * teamId, color
-  * firstBlood, dragonsKilled, baronsKilled, towersKilled, quickWin, matchVictory
+  * `teamId`, `color`
+  * `firstBlood`, `dragonsKilled`, `baronsKilled`, `towersKilled`, `quickWin`, `matchVictory`
 * playerStats
-  * summonerName
-  * kills, deaths, assists, mk, tripleKills, quadraKills, pentaKills
+  * `summonerName`
+  * `kills`, `deaths`, `assists`, `mk`, `tripleKills`, `quadraKills`, `pentaKills`
 
 As the socket remains open it will send updates, such as whenever someone hits a CS, or baron is killed. Example:
 ```
