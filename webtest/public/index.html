@@ -10,33 +10,12 @@
   {
     output = document.getElementById("output");
   }
-
-  function testWebSocket()
-  {
-    websocket = new WebSocket(wsUri);
-    websocket.onopen = function(evt) { onOpen(evt) };
-    websocket.onclose = function(evt) { onClose(evt) };
-    websocket.onmessage = function(evt) { onMessage(evt) };
-    websocket.onerror = function(evt) { onError(evt) };
-  }
     
   function onOpen(evt)
   {
     while (output.firstChild) {
       output.removeChild(output.firstChild);
     }
-    doSend("Get Stats");
-  }
-
-  function onClose(evt)
-  {
-    writeToScreen("DISCONNECTED");
-  }
-
-  function onMessage(evt)
-  {
-    writeToScreen(evt.data);
-    websocket.close();
   }
 
   function onError(evt)
@@ -48,6 +27,115 @@
   {
     writeToScreen("SENT: " + message);
     websocket.send(message);
+  }
+
+  function onClose(evt)
+  {
+    writeToScreen("DISCONNECTED");
+  }
+
+  function getDayStats()
+  {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt); doSend('Day Stats'); };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onOpen(evt); doSend('Day Stats'); onDayMessage(evt); };
+    websocket.onerror = function(evt) { onError(evt) };
+  }
+    
+  function getLiveStats()
+  {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt); doSend('Live Stats'); };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onOpen(evt); doSend('Live Stats'); onLiveMessage(evt); };
+    websocket.onerror = function(evt) { onError(evt) };
+  }
+  
+  function calculateTeamScore(stats) {
+    var score = 0
+    
+    return score
+  }
+  
+  function calculatePlayerScore(stats, tenbonus){
+    var score = 0
+    score += stats.kills * 2
+    score -= stats.deaths * 0.5
+    score += stats.assists * 1.5
+    score += cs * 0.01
+    score += stats.tripleKills * 2
+    score += stats.quadraKills * 3
+    score += stats.pentaKills * 5
+    score += tenbonus * 2
+    return score
+  }
+
+  function formatPlayerStats(stats) {
+  
+    // STRINGS
+    var name = stats.summonerName
+    
+    var kda = JSON.stringify(stats.kills) + '/' +
+            JSON.stringify(stats.deaths) + '/' +
+            JSON.stringify(stats.assists);
+    var cs = stats.mk;
+    
+    var multi = JSON.stringify(stats.tripleKills) + '/' +
+            JSON.stringify(stats.quadraKills) + '/' +
+            JSON.stringify(stats.pentaKills);
+            
+    var tenbonus = 0;
+    if (stats.kills >= 10) tenbonus = 1
+    if (stats.assists >= 10) tenbonus = 1
+    
+    // SCORE
+    var score = 0
+    score += stats.kills * 2
+    score -= stats.deaths * 0.5
+    score += stats.assists * 1.5
+    score += cs * 0.01
+    score += stats.tripleKills * 2
+    score += stats.quadraKills * 3
+    score += stats.pentaKills * 5
+    score += tenbonus * 2
+    //var score = calculatePlayerScore(stats, tenbonus)
+    
+    var prnt = name + ': ' + score.toFixed(2) + ' : ' + kda + ' ' + cs +  ' ' + multi + ' ' + tenbonus
+    return prnt
+  }
+  
+  function onDayMessage(evt)
+  {
+    var matches = JSON.parse(evt.data);
+    for (match in matches) {
+      writeToScreen('Match #' + match);
+      var players = matches[match].playerStats
+      for(player in players) {
+        var stats = formatPlayerStats(matches[match].playerStats[player])
+        writeToScreen(stats)
+      }
+    }
+    websocket.close();
+  }
+    
+  function onLiveMessage(evt)
+  {
+    var matches = JSON.parse(evt.data);
+    var keys = Object.keys(matches)
+    var match = keys[keys.length - 1];
+    writeToScreen('Match #' + match);
+    var players = matches[match].playerStats
+    for(player in players) {
+      var stats = formatPlayerStats(matches[match].playerStats[player])
+      writeToScreen(stats)
+      //writeToScreen(matches[match].playerStats[player].summonerName + prettify(matches[match].playerStats[player]))
+    }
+    websocket.close();
+  }
+    
+  function prettify(jsonObj){
+    return JSON.stringify(jsonObj,null,'\t')
   }
 
   function writeToScreen(message)
@@ -64,6 +152,8 @@
 
   <h2>WebSocket Test</h2>
 
-  <button onclick="testWebSocket()">Resend</button>
+  <button onclick="getDayStats()">Day</button>
+
+  <button onclick="getLiveStats()">Live</button>
 
   <div id="output"></div>
