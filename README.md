@@ -2,7 +2,18 @@
 
 * /en-US/api/league/{id}: Must be logged in to access
 * /en-US/api/season/{id}: Complete information for each season. Contains objects `proTeams`, `proPlayers`, and `proMatches`.
-* ws://livestats.proxy.lolesports.com/stats: Websocket for live updates for EU and NA games (fantasy games from LCS). When you first connect during a game it give send the rundown of points scored by kills/assists, etc by teams and players. As the socket remains open it will send updates, such as whenever someone hits a CS, or baron is killed. Example:
+* ws://livestats.proxy.lolesports.com/stats: Websocket for live updates for EU and NA games (fantasy games from LCS).
+
+When you first connect during a game it give send the rundown of points scored by kills/assists, etc by teams and players.
+Notable return fields for each match:
+* teamStats
+  * teamId, color
+  * firstBlood, dragonsKilled, baronsKilled, towersKilled, quickWin, matchVictory
+* playerStats
+  * summonerName
+  * kills, deaths, assists, mk, tripleKills, quadraKills, pentaKills
+
+As the socket remains open it will send updates, such as whenever someone hits a CS, or baron is killed. Example:
 ```
 {
   "1002360040": {
