@@ -7,6 +7,8 @@ var app = express().use(express.static('public'));
 var server = http.createServer(app);
 server.listen(8080, '127.0.0.1');
 
+console.log('Listening on localhost:8080')
+
 var wss = new WSS({ port: 8081 });
 wss.on('connection', function(socket) {
   console.log('Opened Connection 🎉');

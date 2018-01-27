@@ -33,22 +33,40 @@
   {
     writeToScreen("DISCONNECTED");
   }
+  
+  function getRawStats()
+  {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt); doSend('Raw Stats'); };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { doSend('Raw Stats'); onRawMessage(evt); };
+    websocket.onerror = function(evt) { onError(evt) };
+  }
 
   function getDayStats()
   {
     websocket = new WebSocket(wsUri);
     websocket.onopen = function(evt) { onOpen(evt); doSend('Day Stats'); };
     websocket.onclose = function(evt) { onClose(evt) };
-    websocket.onmessage = function(evt) { onOpen(evt); doSend('Day Stats'); onDayMessage(evt); };
+    websocket.onmessage = function(evt) {  doSend('Day Stats'); onDayMessage(evt); };
     websocket.onerror = function(evt) { onError(evt) };
   }
     
   function getLiveStats()
   {
     websocket = new WebSocket(wsUri);
-    websocket.onopen = function(evt) { onOpen(evt); doSend('Live Stats'); };
+    websocket.onopen = function(evt) { onOpen(evt); }
     websocket.onclose = function(evt) { onClose(evt) };
     websocket.onmessage = function(evt) { onOpen(evt); doSend('Live Stats'); onLiveMessage(evt); };
+    websocket.onerror = function(evt) { onError(evt) };
+  }
+  
+  function getFlashStats()
+  {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt); }
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onOpen(evt); doSend('Flash Stats'); onLiveMessage(evt); websocket.close(); };
     websocket.onerror = function(evt) { onError(evt) };
   }
   
@@ -116,13 +134,13 @@
         writeToScreen(stats)
       }
     }
-    websocket.close();
   }
     
   function onLiveMessage(evt)
   {
     var matches = JSON.parse(evt.data);
     var keys = Object.keys(matches)
+    writeToScreen(Object.keys[matches])
     var match = keys[keys.length - 1];
     writeToScreen('Match #' + match);
     var players = matches[match].playerStats
@@ -131,10 +149,20 @@
       writeToScreen(stats)
       //writeToScreen(matches[match].playerStats[player].summonerName + prettify(matches[match].playerStats[player]))
     }
-    websocket.close();
+  }
+  
+  function onRawMessage(evt)
+  {
+    var matches = JSON.parse(evt.data);
+    for (match in matches) {
+      writeToScreen('Match #' + match);
+      var stats = matches[match].playerStats
+      writeToScreen(JSON.stringify(matches[match]))
+    }
   }
     
-  function prettify(jsonObj){
+  function prettify(jsonObj)
+  {
     return JSON.stringify(jsonObj,null,'\t')
   }
 
@@ -152,8 +180,12 @@
 
   <h2>WebSocket Test</h2>
 
+  <button onclick="getRawStats()">Raw</button>
+
   <button onclick="getDayStats()">Day</button>
 
   <button onclick="getLiveStats()">Live</button>
+
+  <button onclick="getFlashStats()">Flash</button>
 
   <div id="output"></div>
